@@ -15,7 +15,7 @@ import numpy as nu
 
 A_A = 20;           # Attaque Alien
 A_D = 20;           # Defense (HP) Alien
-A_PM = 4;           # Points de mouvement Alien
+A_PM = 16;           # Points de mouvement Alien
 A_x = 5;            # Abscisse Alien
 A_y = 5;            # Ordonnée Alien
 
@@ -50,8 +50,9 @@ for i in range(-A_PM-1,A_PM+2):                         # Recherche selon x
     X_test = A_x+i;                                     # Plus ou moins un car on veut être au moins adjacent à la proie
     for j in range(abs(i)-A_PM-1, A_PM-abs(i)+2):       # Selon y
         Y_test = A_y+j;
-        if HMap[X_test,Y_test] == 1:                    # On remplie la liste des positions des proies
-            Prey.append([X_test,Y_test]);
+        if X_test<len(HMap) and X_test >= 0 and Y_test<len(HMap) and Y_test >= 0 :      # Si on est toujours sur la map
+            if HMap[X_test,Y_test] == 1:                    # On remplie la liste des positions des proies
+                Prey.append([X_test,Y_test]);
             
             
             
@@ -81,66 +82,78 @@ else :
     
     
     
-    
+  
 ##### Calcul des risques #####
     
 Pos_Pos = []                        #Tableau des positions possibles
 Ris = [];
 Gain = [];          # Liste des gains, qui va nous servir à la fin
 id = 0;                             # Index de la case observée (len(Prey)*4 cases en tout)
+
+
+
+
 # Pour la PROIE 1 :
 
 for i in range(-1,2):
     for j in range(-1+abs(i),1-abs(i)+1):                     # On regarde toutes les cases adjacentes à celle de la proie
-        if i != 0 or j != 0:                                            # Si on est pas sur la proie
-            if (abs((H1_x+i)-A_x) + abs((H1_y+j)-A_y)) <= A_PM:         # Si l'on est toujours à portée de cette case
+        if i != 0 or j != 0:                                        # Si on est pas sur la proie
+            if (abs((H1_x+i)-A_x) + abs((H1_y+j)-A_y)) <= A_PM:     # Si l'on est toujours à portée de cette case
                 Pos_Pos.append([(H1_x+i),(H1_y+j)])
-                Ris.append(0)
+                Ris.append(0)                                       # On sait qu'on va calculer un gain et un risque, on fait de la place dans le tableau
                 Gain.append(0)
                 
 # Detection des predateurs 
-                for k in range(-A_PM,A_PM+1):                             # Recherche selon x
-                    X_test = A_x+i;
-                    for l in range(abs(i)-A_PM, A_PM-abs(i)+1):           # Selon y
-                        Y_test = A_y+j;
-                        if HMap[X_test,Y_test] == 1:        # On remplie la liste des positions des predateurs
-                            Pred.append([X_test,Y_test]);
+                for k in range(-10,10+1):                             # Recherche selon x
+                    X_test = H2_x+i+k;
+                    for l in range(abs(k)-10, 10-abs(k)+1):           # Selon y
+                        Y_test = H2_y+j+l;
+                        if X_test<len(HMap) and X_test >= 0 and Y_test<len(HMap) and Y_test >= 0 :      # Si on est toujours sur la map
+                            if HMap[X_test,Y_test] == 1:                            # Si la case correspond à un predateur
+                                if X_test == H1_x and Y_test == H1_y:               # Si la proie n'est pas celle que l'on detruit
+                                    if A_A <= H1_D :                                # Si destruction
+                                        Pred.append([X_test,Y_test]);               # Créer une liste des prédateurs à portée, ne sert pas pour la suite de l'algo mais utile sur Gamemaker
+                                else:
+                                    Pred.append([X_test,Y_test]);
                             
 # Risque
-                if A_D <= H2_A:                     # H2_A est en fait l'attaque de TOUS les predateurs qui ont la portée
-                    Ris[id] = A_D + A_A;            # Risque en cas de destruction
+                if A_D <= H2_A+H1_A:        # H2_A+H1_A est en fait l'attaque de TOUS les predateurs qui ont la portée
+                    Ris[id] = A_D + A_A;    # Risque en cas de destruction
                 else :
-                    Ris[id] = H2_A;                 # Non destruction
+                    Ris[id] = H2_A;         # Non destruction
             
 # Gain  
                                                     
-                Gain[id] = Rec[0]-Ris[id]             # Significatif de la meilleure option ; Rec[0] car on est dans la partie du tableau qui correspond à la proie 1
+                Gain[id] = Rec[0]-Ris[id]   # Significatif de la meilleure option ; Rec[0] car on est dans la partie du tableau qui correspond à la proie 1
                 id += 1;
             
+          
             
             
             
-            
-            
+       
 # Pour la PROIE 2 :
 
 for i in range(-1,2):
     for j in range(-1+abs(i),1-abs(i)+1):                     # On regarde toutes les cases adjacentes à celle de la proie
-        if i != 0 or j != 0:                                            # Si on est pas sur la proie
-            if (abs((H2_x+i)-A_x) + abs((H2_y+j)-A_y)) <= A_PM:         # Si l'on est toujours à portée de cette case
+        if i != 0 or j != 0:                                        # Si on est pas sur la proie
+            if (abs((H2_x+i)-A_x) + abs((H2_y+j)-A_y)) <= A_PM:     # Si l'on est toujours à portée de cette case
                 Pos_Pos.append([(H2_x+i),(H2_y+j)])
-                Ris.append(0)
+                Ris.append(0)                                       # On sait qu'on va calculer un gain et un risque, on fait de la place dans le tableau 
                 Gain.append(0)
                 
 # Detection des predateurs 
-                for k in range(-A_PM,A_PM+1):                             # Recherche selon x
-                    X_test = A_x+i;
-                    for l in range(abs(i)-A_PM, A_PM-abs(i)):           # Selon y
-                        Y_test = A_y+j;
-                        #print(id, X_test, Y_test)
-                        if HMap[X_test,Y_test] == 1:        # On remplie la liste des positions des predateurs
-                            Pred.append([X_test,Y_test]);
-                            
+                for k in range(-10,10+1):                           # Recherche selon x, le 10 est arbitraire
+                    X_test = H2_x+i+k;                              # On regarde les cases depuis la position considérée
+                    for l in range(abs(k)-10, 10-abs(k)+1):         # Selon y
+                        Y_test = H2_y+j+l;
+                        if X_test<len(HMap) and X_test >= 0 and Y_test<len(HMap) and Y_test >= 0 :      # Si on est toujours sur la map
+                            if HMap[X_test,Y_test] == 1:                            # Si la case correspond à un predateur
+                                if X_test == H2_x and Y_test == H2_y:               # Si la proie n'est pas celle que l'on detruit
+                                    if A_A <= H2_D :                                # Si destruction
+                                        Pred.append([X_test,Y_test]);               # Créer une liste des prédateurs à portée, ne sert pas pour la suite de l'algo mais utile sur Gamemaker
+                                else:
+                                    Pred.append([X_test,Y_test]);
 # Risque
                 if A_D <= H1_A:                     # H1_A est en fait l'attaque de TOUS les predateurs qui ont la portée
                     Ris[id] = A_D + A_A;            # Risque en cas de destruction
@@ -181,8 +194,4 @@ else :
 '''
 PROBLEMES :
     Je recherche les prédateurs selon les PM de l'alien et non les PM des enemis aux alentours
-    Il y a une erreur dans la recherche de prédateurs quand on sort de la map
 '''
-
-
-
