@@ -21,13 +21,13 @@ A_y = 5;            # Ordonnée Alien
 
 H1_A = 8;           # Attaque Humain 1
 H1_D = 22;          # Defense Humain 1
-H1_PM = 4;          # Points de mouvement Humain 1
+H1_PM = 3;          # Points de mouvement Humain 1
 H1_x = 7;           # Abscisse Humain 1
 H1_y = 7;           # Ordonnée Humain 1
 
 H2_A = 12;          # Attaque Humain 2
 H2_D = 18;          # Defense Humain 2
-H2_PM = 4;          # Points de mouvement Humain 2
+H2_PM = 3;          # Points de mouvement Humain 2
 H2_x = 3;           # Abscisse Humain 2
 H2_y = 7;           # Ordonnée Humain 2
 
@@ -114,7 +114,8 @@ for i in range(-1,2):
                                     if A_A <= H1_D :                                # Si destruction
                                         Pred.append([X_test,Y_test]);               # Créer une liste des prédateurs à portée, ne sert pas pour la suite de l'algo mais utile sur Gamemaker
                                 else:
-                                    Pred.append([X_test,Y_test]);
+                                    if (abs((H1_x+i)-X_test) + abs((H1_y+j)-Y_test)) <= H2_PM+1 :     # On regarde si le prédateur est à portée (Si c'est la cible qu'on attaque, elle est forcement à portée) 
+                                        Pred.append([X_test,Y_test]);
                             
 # Risque
                 if A_D <= H2_A+H1_A:        # H2_A+H1_A est en fait l'attaque de TOUS les predateurs qui ont la portée
@@ -153,7 +154,8 @@ for i in range(-1,2):
                                     if A_A <= H2_D :                                # Si destruction
                                         Pred.append([X_test,Y_test]);               # Créer une liste des prédateurs à portée, ne sert pas pour la suite de l'algo mais utile sur Gamemaker
                                 else:
-                                    Pred.append([X_test,Y_test]);
+                                    if (abs((H2_x+i)-X_test) + abs((H2_y+j)-Y_test)) <= H1_PM+1 :     # On regarde si le prédateur est à portée (Si c'est la cible qu'on attaque, elle est forcement à portée)
+                                        Pred.append([X_test,Y_test]);
 # Risque
                 if A_D <= H1_A:                     # H1_A est en fait l'attaque de TOUS les predateurs qui ont la portée
                     Ris[id] = A_D + A_A;            # Risque en cas de destruction
@@ -165,7 +167,8 @@ for i in range(-1,2):
                 Gain[id] = Rec[1]-Ris[id]           # Significatif de la meilleure option ; Rec[1] car on est dans la partie du tableau qui correspond à la proie 2
                 id += 1;
 
-
+## Lors du calcul de risque, l'IA prend en compte les ennemis que j'ai rentré à la main, et pas ceux qu'elle a détecté juste avant.
+## Il faudra le faire directement sur GM avec la fonction qui donne les attributs d'une case et de l'unité sur celle-ci.
 
 ##### Décision #####
 
@@ -187,11 +190,3 @@ if D >= 10 :
 else :
     [A_x,A_y] = [A_x,A_y];              # Prévoir une solution de retrait si le gain est pas fou dans tout les cas (négatif par exemple)
     print("L'Alien n'attaque pas.")
-
-
-
-
-'''
-PROBLEMES :
-    Je recherche les prédateurs selon les PM de l'alien et non les PM des enemis aux alentours
-'''
